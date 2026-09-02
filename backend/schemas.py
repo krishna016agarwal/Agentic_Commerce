@@ -58,6 +58,8 @@ class ChatResponse(BaseModel):
     recommended_products: List[ProductResponse] = []
     # Populated when checkout_trigger resolves autonomously
     checkout_result: Optional[Dict[str, Any]] = None
+    # Cart mutation instructions for the frontend (ADD, REMOVE, CLEAR)
+    cart_action: Optional[Dict[str, Any]] = None
     # Legacy field kept for backward compat with existing frontend
     intent_payload: Optional[Dict[str, Any]] = None
 

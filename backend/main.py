@@ -10,6 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from database import init_db, get_db, log_audit_event, BASE_DIR
 from schemas import (
+    CartItem,
     ChatRequest, ChatResponse,
     UpsellRequest, UpsellResponse,
     CheckoutInitiateRequest, CheckoutInitiateResponse,
@@ -212,6 +213,29 @@ def chat(payload: ChatRequest):
             )
             agent_result["checkout_trigger"] = False
 
+        # Resolve cart_action product details for ADD_TO_CART so the frontend gets a full product object
+        raw_cart_action = agent_result.get("cart_action")
+        cart_action = None
+        if raw_cart_action and isinstance(raw_cart_action, dict):
+            action_type = raw_cart_action.get("action", "").upper()
+            action_pid = raw_cart_action.get("product_id")
+            if action_type in ("ADD", "REMOVE") and action_pid:
+                resolved_prod = None
+                # Try to find product in already-resolved recommended_products first
+                for rp in agent_result.get("recommended_products", []):
+                    if rp.get("product_id") == action_pid:
+                        resolved_prod = rp
+                        break
+                if not resolved_prod:
+                    from agents import get_product_by_id
+                    resolved_prod = get_product_by_id(action_pid)
+                if resolved_prod:
+                    cart_action = {
+                        "action": action_type,
+                        "product_id": action_pid,
+                        "product": {**resolved_prod, "in_stock": resolved_prod.get("stock_qty", 1) > 0}
+                    }
+
         return {
             "agent_name": agent_result.get("agent_name", "Atelier AI Shopping Concierge"),
             "message": agent_result.get("message", "How can I help you?"),
@@ -220,6 +244,7 @@ def chat(payload: ChatRequest):
             "catalog_offer": agent_result.get("catalog_offer"),
             "recommended_products": agent_result.get("recommended_products", []),
             "checkout_result": checkout_result,
+            "cart_action": cart_action,
             "intent_payload": agent_result.get("intent_payload", {"intent": agent_result.get("intent", "CHAT")})
         }
 

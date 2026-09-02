@@ -403,6 +403,7 @@ export default function App() {
           setInitialChatQuery(null)
         }}
         onAddToCart={handleAddToCart}
+        onRemoveFromCart={handleRemoveItem}
         cart={cart}
         discountCode={discountCode}
         user={user}

@@ -25,6 +25,25 @@ export default {
         serif: ['"Playfair Display"', 'Georgia', 'serif'],
         sans: ['"Inter"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
         mono: ['"JetBrains Mono"', 'monospace']
+      },
+      keyframes: {
+        fadeIn: {
+          '0%': { opacity: '0', transform: 'scale(0.98)' },
+          '100%': { opacity: '1', transform: 'scale(1)' }
+        },
+        slideInRight: {
+          '0%': { transform: 'translateX(100%)' },
+          '100%': { transform: 'translateX(0)' }
+        },
+        bounceShort: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-6px)' }
+        }
+      },
+      animation: {
+        fadeIn: 'fadeIn 0.2s ease-out',
+        slideInRight: 'slideInRight 0.3s ease-out',
+        'bounce-short': 'bounceShort 0.6s ease-in-out'
       }
     },
   },

@@ -1,5 +1,39 @@
+# Prompts & Temporary Assets
 antigravity-conversational-amazon-prompt.md
 antigravity-master-prompt.md
 download (1).webp
 download.webp
 png-transparent-product-kind-omega-watches-watches-product-kind-omega-watch-thumbnail.png
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+backend/*.db
+backend/*.db-wal
+backend/*.db-shm
+*.db
+*.sqlite3
+
+# Environment Variables & Secrets
+.env
+.env.*
+!.env.example
+
+# Node / Frontend
+frontend/node_modules/
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

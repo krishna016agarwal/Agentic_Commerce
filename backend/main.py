@@ -105,7 +105,8 @@ def chat(payload: ChatRequest):
         agent_result = BuyerAgent.process_message(
             user_id=payload.user_id,
             message=payload.message,
-            api_key=payload.gemini_api_key
+            api_key=payload.gemini_api_key,
+            cart=payload.cart
         )
 
         checkout_result = None
@@ -206,11 +207,13 @@ def chat(payload: ChatRequest):
                 agent_result["message"] = f"❌ I couldn't process the payment: {ve}. Please check your cart or stock levels and try again."
 
         elif agent_result.get("checkout_trigger") and not checkout_cart:
-            agent_result["message"] = (
-                "Your cart is currently empty! Please tell me which item you'd like to purchase "
-                "(e.g., *'Buy the Omega watch'* or *'Order Keychron keyboard'*), or click **Add to Cart** on any product card, "
-                "and I'll book it immediately."
-            )
+            # Only set empty cart message if user actually meant to checkout now
+            if agent_result.get("intent") == "INITIATE_CHECKOUT":
+                agent_result["message"] = (
+                    "Your cart is currently empty! Please tell me which item you'd like to purchase "
+                    "(e.g., *'Buy the Omega watch'* or *'Order Keychron keyboard'*), or click **Add to Cart** on any product card, "
+                    "and I'll book it immediately."
+                )
             agent_result["checkout_trigger"] = False
 
         # Resolve cart_action product details for ADD_TO_CART so the frontend gets a full product object

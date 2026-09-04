@@ -8,14 +8,18 @@ export default function VisualAuditTrail({
 }) {
   const [expandedId, setExpandedId] = useState(null)
 
-  const getTagColor = (tag) => {
-    if (tag.includes('AUTONOMOUS')) return 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
-    if (tag.includes('ESCALATION') || tag.includes('ERROR') || tag.includes('ALERT')) return 'bg-rose-500/15 text-rose-400 border-rose-500/30'
-    if (tag.includes('RAZORPAY')) return 'bg-blue-500/15 text-blue-400 border-blue-500/30'
-    if (tag.includes('UAP') || tag.includes('CEILING')) return 'bg-amber-500/15 text-amber-400 border-amber-500/30'
-    if (tag.includes('STOCK')) return 'bg-purple-500/15 text-purple-400 border-purple-500/30'
-    if (tag.includes('SIGNATURE') || tag.includes('SETTLEMENT')) return 'bg-teal-500/15 text-teal-400 border-teal-500/30'
-    if (tag.includes('IDEMPOTENCY')) return 'bg-cyan-500/15 text-cyan-400 border-cyan-500/30'
+  const getTagColor = (tag = '') => {
+    const t = tag.toUpperCase()
+    if (t.includes('AUTONOMOUS')) return 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
+    if (t.includes('ESCALATION') || t.includes('ERROR') || t.includes('ALERT') || t.includes('OVER_LIMIT')) return 'bg-rose-500/15 text-rose-400 border-rose-500/30'
+    if (t.includes('RAZORPAY')) return 'bg-blue-500/15 text-blue-400 border-blue-500/30'
+    if (t.includes('UAP') || t.includes('CEILING') || t.includes('LIMIT')) return 'bg-amber-500/15 text-amber-400 border-amber-500/30'
+    if (t.includes('STOCK') || t.includes('INVENTORY')) return 'bg-purple-500/15 text-purple-400 border-purple-500/30'
+    if (t.includes('IDEMPOTENCY')) return 'bg-cyan-500/15 text-cyan-400 border-cyan-500/30'
+    if (t.includes('PRODUCT') || t.includes('EXPLAIN') || t.includes('CATALOG')) return 'bg-indigo-500/15 text-indigo-400 border-indigo-500/30'
+    if (t.includes('UPSELL')) return 'bg-pink-500/15 text-pink-400 border-pink-500/30'
+    if (t.includes('SWEEPER')) return 'bg-orange-500/15 text-orange-400 border-orange-500/30'
+    if (t.includes('SIGNATURE') || t.includes('SETTLEMENT') || t.includes('SECURITY')) return 'bg-teal-500/15 text-teal-400 border-teal-500/30'
     return 'bg-slate-700/30 text-slate-300 border-slate-700'
   }
 

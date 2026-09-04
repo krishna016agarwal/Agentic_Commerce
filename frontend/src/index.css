@@ -1,27 +1,18 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Montserrat:ital,wght@0,700;0,800;0,900;1,700;1,900&family=JetBrains+Mono:wght@400;500;600&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,400&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --gold: #f0c04a;
-  --gold-light: #f5d47a;
-  --gold-dark: #c8952a;
-  --bg-deep: #080c12;
-  --bg-base: #0c1018;
-  --bg-card: #111720;
-  --bg-card-hover: #161e2a;
-  --bg-panel: #0f1420;
-  --border: rgba(255,255,255,0.07);
-  --border-bright: rgba(255,255,255,0.14);
-  --text-primary: #f0f4ff;
-  --text-secondary: #8899bb;
-  --text-muted: #4a5568;
-  --accent-blue: #3b82f6;
-  --accent-emerald: #10b981;
-  --accent-rose: #f43f5e;
-  --accent-amber: #f59e0b;
+  --shop-bg: #FFFFFF;
+  --shop-offwhite: #F2F0F1;
+  --shop-card: #F0EEED;
+  --shop-container: #F0F0F0;
+  --shop-dark: #000000;
+  --shop-text: #000000;
+  --shop-muted: #666666;
+  --shop-border: #E5E5E5;
 }
 
 * { box-sizing: border-box; }
@@ -29,20 +20,30 @@
 html { scroll-behavior: smooth; }
 
 body {
-  font-family: 'Inter', system-ui, sans-serif;
-  background: var(--bg-deep);
-  color: var(--text-primary);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--shop-bg);
+  color: var(--shop-text);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
 }
 
-/* Scrollbars */
-::-webkit-scrollbar { width: 4px; height: 4px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 99px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
+/* Hide scrollbar for Chrome, Safari and Opera */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+/* Hide scrollbar for IE, Edge and Firefox */
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
 
-/* ─── Animations ─────────────────────────────────────────────────── */
+/* Scrollbars */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.3); }
+
+/* â”€â”€â”€ Animations â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
@@ -92,7 +93,7 @@ body {
 .animate-bounceIn    { animation: bounceIn 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards; }
 .animate-spin-slow   { animation: spin-slow 2s linear infinite; }
 
-/* ─── Glass & Card Styles ───────────────────────────────────────── */
+/* â”€â”€â”€ Glass & Card Styles â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .glass {
   background: rgba(17, 24, 39, 0.6);
@@ -121,7 +122,7 @@ body {
   box-shadow: 0 16px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(240,192,74,0.15);
 }
 
-/* ─── Buttons ────────────────────────────────────────────────────── */
+/* â”€â”€â”€ Buttons â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .btn-gold {
   background: linear-gradient(135deg, #f0c04a, #c8952a);
@@ -153,7 +154,7 @@ body {
   color: var(--text-primary);
 }
 
-/* ─── Chat bubbles ──────────────────────────────────────────────── */
+/* â”€â”€â”€ Chat bubbles â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .chat-bubble-user {
   background: linear-gradient(135deg, #1d4ed8, #2563eb);
@@ -178,7 +179,7 @@ body {
   box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 
-/* ─── Badge ─────────────────────────────────────────────────────── */
+/* â”€â”€â”€ Badge â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .badge {
   font-size: 0.6rem;
@@ -195,7 +196,7 @@ body {
 .badge-blue    { background: rgba(59,130,246,0.12); color: #60a5fa; border: 1px solid rgba(59,130,246,0.25); }
 .badge-purple  { background: rgba(139,92,246,0.12); color: #a78bfa; border: 1px solid rgba(139,92,246,0.25); }
 
-/* ─── Input ─────────────────────────────────────────────────────── */
+/* â”€â”€â”€ Input â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .input-dark {
   background: rgba(0,0,0,0.3);
@@ -211,7 +212,7 @@ body {
 .input-dark:focus { border-color: rgba(240,192,74,0.5); }
 .input-dark::placeholder { color: var(--text-muted); }
 
-/* ─── Typing indicator ──────────────────────────────────────────── */
+/* â”€â”€â”€ Typing indicator â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .typing-dot {
   width: 7px; height: 7px;
@@ -227,7 +228,7 @@ body {
   40% { transform: scale(1); opacity: 1; }
 }
 
-/* ─── Nav active ────────────────────────────────────────────────── */
+/* â”€â”€â”€ Nav active â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .nav-link {
   font-size: 0.875rem;
@@ -242,7 +243,7 @@ body {
 .nav-link:hover { color: var(--text-primary); background: rgba(255,255,255,0.06); }
 .nav-link.active { color: var(--gold); background: rgba(240,192,74,0.1); }
 
-/* ─── Shimmer loading ───────────────────────────────────────────── */
+/* â”€â”€â”€ Shimmer loading â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .shimmer {
   background: linear-gradient(90deg, var(--bg-card) 25%, var(--bg-card-hover) 50%, var(--bg-card) 75%);
@@ -250,7 +251,7 @@ body {
   animation: shimmer 1.5s infinite;
 }
 
-/* ─── Category pill ─────────────────────────────────────────────── */
+/* â”€â”€â”€ Category pill â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .category-pill {
   padding: 6px 16px;
@@ -267,7 +268,7 @@ body {
 .category-pill:hover { border-color: var(--border-bright); color: var(--text-primary); }
 .category-pill.active { background: rgba(240,192,74,0.12); border-color: rgba(240,192,74,0.4); color: var(--gold); }
 
-/* ─── Drawer overlay ───────────────────────────────────────────── */
+/* â”€â”€â”€ Drawer overlay â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .drawer-overlay {
   position: fixed; inset: 0;
@@ -276,7 +277,7 @@ body {
   z-index: 40;
 }
 
-/* ─── Audit terminal ────────────────────────────────────────────── */
+/* â”€â”€â”€ Audit terminal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .terminal-line {
   font-family: 'JetBrains Mono', monospace;
@@ -286,7 +287,7 @@ body {
   line-height: 1.6;
 }
 
-/* ─── Product image ─────────────────────────────────────────────── */
+/* â”€â”€â”€ Product image â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .product-img {
   width: 100%; aspect-ratio: 4/3;
@@ -295,7 +296,7 @@ body {
 }
 .card-product:hover .product-img { transform: scale(1.04); }
 
-/* ─── Success glow ──────────────────────────────────────────────── */
+/* â”€â”€â”€ Success glow â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .glow-emerald { box-shadow: 0 0 24px rgba(16,185,129,0.3); }
 .glow-gold    { box-shadow: 0 0 24px rgba(240,192,74,0.3); }

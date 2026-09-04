@@ -504,6 +504,70 @@ class BuyerAgent:
                 })
         # If intent == "CHAT", recommended_products remains empty so it will NOT show unrelated products!
 
+        # ── 4. Granular Audit Logging (Buildathon Track 1 Architecture) ──
+        msg_lower_full = message.lower()
+        is_explain_query = any(w in msg_lower_full for w in ["explain", "feature", "specs", "specification", "detail", "tell me about"])
+        is_all_products_query = any(w in msg_lower_full for w in ["show all", "all products", "list products", "catalog", "show products", "show watches", "show laptops", "products"])
+        matched_target_prod = find_best_matching_product(message)
+
+        if intent == "STOCK_OUT_WARNING" or (matched_target_prod and matched_target_prod.get("stock_qty", 0) <= 0 and any(w in msg_lower_full for w in ["buy", "order", "add", "purchase", "checkout", "get"])):
+            failed_p = matched_target_prod or (recommended_products[0] if recommended_products else {"product_id": "prod_out_of_stock", "name": "Requested Item"})
+            stock_out_payload = {
+                "user_id": user_id,
+                "intent": "STOCK_OUT_WARNING",
+                "model": "gemini-3.1-flash-lite",
+                "failed_item": {
+                    "product_id": failed_p["product_id"],
+                    "name": failed_p["name"],
+                    "available_stock": 0
+                },
+                "system_action": "BLOCKED_CHECKOUT_CONVERSATIONALLY",
+                "graceful_fallback_message": f"I'm sorry, the {failed_p['name']} is currently out of stock. Would you like me to recommend a comparable model instead?"
+            }
+            log_audit_event(
+                "[STOCK OUT WARNING]",
+                f"BLOCKED (Failure Handled Gracefully #1): {failed_p['name']} is out of stock. Checkout blocked conversationally.",
+                level="ALERT",
+                metadata=stock_out_payload
+            )
+        elif is_explain_query and (matched_target_prod or (recommended_products and len(recommended_products) == 1)):
+            target = matched_target_prod or recommended_products[0]
+            explain_payload = {
+                "user_id": user_id,
+                "intent": "EXPLAIN_PRODUCT",
+                "model": "gemini-3.1-flash-lite",
+                "target_product": {
+                    "product_id": target["product_id"],
+                    "name": target["name"],
+                    "description": target["description"],
+                    "price_paisa": target["price_paisa"],
+                    "stock_qty": target["stock_qty"]
+                }
+            }
+            log_audit_event(
+                "[EXPLAIN PRODUCT]",
+                f"Detailed specs generated for {target['name']}",
+                level="INFO",
+                metadata=explain_payload
+            )
+        elif is_all_products_query or (intent in ("SHOW_PRODUCTS", "SHOW_ALL_PRODUCTS") and recommended_products):
+            prods_to_log = recommended_products if recommended_products else get_all_products()[:6]
+            show_all_payload = {
+                "user_id": user_id,
+                "intent": "SHOW_ALL_PRODUCTS",
+                "model": "gemini-3.1-flash-lite",
+                "returned_products": [
+                    {"product_id": p["product_id"], "name": p["name"], "stock_qty": p.get("stock_qty", 0)}
+                    for p in prods_to_log
+                ]
+            }
+            log_audit_event(
+                "[SHOW ALL PRODUCTS]",
+                f"Catalog products returned ({len(prods_to_log)} items)",
+                level="INFO",
+                metadata=show_all_payload
+            )
+
         # Save assistant response to memory WITH displayed products so Gemini remembers next turn
         save_message_to_memory(user_id, "model", result.get("message", ""), shown_products=recommended_products)
 
@@ -659,6 +723,33 @@ class BuyerAgent:
                 prod = get_last_discussed_product(user_id)
 
             if prod:
+                if prod.get("stock_qty", 0) <= 0:
+                    stock_out_payload = {
+                        "user_id": user_id,
+                        "intent": "STOCK_OUT_WARNING",
+                        "model": "gemini-3.1-flash-lite",
+                        "failed_item": {
+                            "product_id": prod["product_id"],
+                            "name": prod["name"],
+                            "available_stock": 0
+                        },
+                        "system_action": "BLOCKED_CHECKOUT_CONVERSATIONALLY",
+                        "graceful_fallback_message": f"I'm sorry, the {prod['name']} is currently out of stock. Would you like me to recommend a comparable model instead?"
+                    }
+                    log_audit_event(
+                        "[STOCK OUT WARNING]",
+                        f"BLOCKED (Failure Handled Gracefully #1): {prod['name']} out of stock. Add to cart blocked conversationally.",
+                        level="ALERT",
+                        metadata=stock_out_payload
+                    )
+                    return {
+                        "message": f"⚠️ I'm sorry, the **{prod['name']}** is currently out of stock. Would you like me to recommend a comparable model instead?",
+                        "intent": "STOCK_OUT_WARNING",
+                        "products": [],
+                        "checkout_trigger": False,
+                        "cart_action": None
+                    }
+
                 upsell_info = SellerAgent.UPSELL_MAP.get(prod["product_id"])
                 if upsell_info:
                     upsell_prod = get_product_by_id(upsell_info["upsell_product_id"])
@@ -1029,10 +1120,27 @@ class SellerAgent:
             "discount_paisa": offer["discount_paisa"]
         }
 
+        original_price = upsell_item["price_paisa"] if upsell_item else 120000
+        bundle_price = max(0, original_price - offer["discount_paisa"])
+        upsell_log = {
+            "trigger_upsell": True,
+            "recommendation_engine": "Seller_Agent_v2",
+            "user_cart": [product_id],
+            "suggested_product": {
+                "product_id": offer["upsell_product_id"],
+                "name": upsell_item["name"] if upsell_item else "Upsell Item",
+                "original_price_paisa": original_price,
+                "bundle_price_paisa": bundle_price,
+                "applied_discount_code": offer["discount_code"],
+                "discount_paisa": offer["discount_paisa"]
+            },
+            "reasoning": f"User has {product_id} in cart. Cross-sell premium {upsell_item['name'] if upsell_item else 'accessory'} with ₹{offer['discount_paisa']/100:.0f} bundle discount."
+        }
+
         log_audit_event(
-            "[SELLER AGENT UPSELL]",
-            f"Upsell bundle offer: {offer['discount_code']} (-Rs {offer['discount_paisa']/100:.0f})",
+            "[UPSELL PROPOSAL]",
+            f"Cross-sell offer: {offer['discount_code']} (-Rs {offer['discount_paisa']/100:.0f}) for {product_id}",
             level="INFO",
-            metadata=payload
+            metadata=upsell_log
         )
         return payload

@@ -7,6 +7,15 @@ export default {
   theme: {
     extend: {
       colors: {
+        shop: {
+          dark: '#000000',
+          offwhite: '#F2F0F1',
+          card: '#F0EEED',
+          container: '#F0F0F0',
+          border: '#E5E5E5',
+          muted: '#666666',
+          accent: '#FF3333'
+        },
         luxury: {
           dark: '#0e1117',
           surface: '#161b22',
@@ -22,9 +31,10 @@ export default {
         }
       },
       fontFamily: {
-        serif: ['"Playfair Display"', 'Georgia', 'serif'],
+        heading: ['"Montserrat"', '"Inter"', 'sans-serif'],
         sans: ['"Inter"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
-        mono: ['"JetBrains Mono"', 'monospace']
+        mono: ['"JetBrains Mono"', 'monospace'],
+        serif: ['"Playfair Display"', 'Georgia', 'serif']
       },
       keyframes: {
         fadeIn: {

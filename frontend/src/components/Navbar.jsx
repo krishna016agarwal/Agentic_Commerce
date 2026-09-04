@@ -1,125 +1,141 @@
-import React from 'react'
-import { ShoppingBag, Sparkles, Sliders, RefreshCw, MessageCircle, Package } from 'lucide-react'
+import React, { useState } from 'react'
+import {
+  Search, ShoppingCart, MessageCircle, Package, Sliders,
+  Terminal, X, ChevronDown, Sparkles
+} from 'lucide-react'
 
 export default function Navbar({
-  user,
-  cartCount,
+  cartCount = 0,
   onOpenCart,
-  onResetDb,
   onToggleSettings,
   onToggleChat,
   isChatOpen,
   onToggleOrders,
-  activeView
+  activeView,
+  searchQuery = '',
+  onSearchChange,
+  onToggleLogs,
+  user
 }) {
-  const remainingInr = user
-    ? ((user.daily_spend_limit - user.daily_spend_accumulated) / 100).toLocaleString('en-IN')
-    : '0'
-  const limitInr = user ? (user.daily_spend_limit / 100).toLocaleString('en-IN') : '0'
+  const [showPromoBanner, setShowPromoBanner] = useState(true)
+
+  const remainingBudgetINR = user
+    ? Math.max(0, Math.round((user.daily_spend_limit - user.daily_spend_accumulated) / 100)).toLocaleString('en-IN')
+    : '50,000'
 
   return (
-    <header className="sticky top-0 z-40 w-full backdrop-blur-md bg-[#0b0f17]/90 border-b border-white/10">
-      {/* Luxury Announcement Bar */}
-      <div className="bg-gradient-to-r from-[#0c2340] via-[#1a365d] to-[#0c2340] py-1.5 px-4 text-xs font-medium text-slate-200 border-b border-blue-500/20 text-center flex items-center justify-center gap-3">
-        <span className="inline-flex items-center gap-1.5 bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded-full text-[11px] font-semibold border border-blue-400/30">
-          <Sparkles className="w-3 h-3 text-amber-300" />
-          RAZORPAY M2M AGENTIC COMMERCE
-        </span>
-        <span className="hidden md:inline text-slate-300">
-          Autonomous Settlement for Under-Limit • Instant Human Escalation via Razorpay Modal for Over-Limit
-        </span>
-      </div>
+    <header className="sticky top-0 z-40 w-full bg-white border-b border-gray-100 shadow-xs transition-all">
+      {/* ── 1. Top Black Promo Announcement Bar (Exact from Screenshot 4) ── */}
+      {showPromoBanner && (
+        <div className="bg-black text-white text-[11px] sm:text-xs py-2 px-4 flex items-center justify-between relative">
+          <div className="flex-1 text-center font-sans tracking-tight">
+            <span>Sign up and get 20% off to your first order. </span>
+            <a
+              href="#catalog"
+              className="font-semibold underline hover:text-gray-300 transition-colors ml-1 cursor-pointer"
+            >
+              Sign Up Now
+            </a>
+          </div>
+          <button
+            onClick={() => setShowPromoBanner(false)}
+            title="Dismiss Announcement"
+            className="text-gray-400 hover:text-white transition-colors ml-2 cursor-pointer p-0.5"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        {/* Brand Logo */}
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#c5a880] to-[#dfc79b] p-0.5 flex items-center justify-center shadow-lg shadow-amber-900/20">
-            <div className="w-full h-full rounded-full bg-[#0e1117] flex items-center justify-center text-[#dfc79b] font-serif font-bold text-lg">
-              Ω
-            </div>
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-serif tracking-widest text-lg font-bold text-slate-100 uppercase">
-                MODESTWEAR <span className="font-sans font-normal text-xs text-amber-400/90">&</span> ATELIER
-              </span>
-              <span className="text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-1.5 py-0.5 rounded font-mono font-semibold">
-                AGENT LIVE
-              </span>
-            </div>
-            <p className="text-[11px] text-slate-400 font-sans tracking-wide">
-              Deterministic Safety Gateway • Razorpay Testnet
-            </p>
-          </div>
+      {/* ── 2. Main Navigation Bar ── */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 sm:h-20 flex items-center justify-between gap-3 sm:gap-6">
+        {/* Left: Brand Logo */}
+        <div className="flex items-center gap-6 lg:gap-8 flex-shrink-0">
+          <button
+            onClick={() => {
+              if (activeView !== 'store') onToggleOrders()
+              window.scrollTo({ top: 0, behavior: 'smooth' })
+            }}
+            className="text-2xl sm:text-3xl font-black tracking-tighter text-black font-heading hover:opacity-90 transition-opacity cursor-pointer text-left"
+          >
+            SHOP.CO
+          </button>
         </div>
 
-        {/* Center/Right Controls */}
-        <div className="flex items-center gap-2 md:gap-3">
-          {/* Autonomous Budget Pill */}
-          <div className="hidden sm:flex items-center gap-2 bg-[#161b22] border border-slate-700/60 rounded-full px-3 py-1.5 text-xs shadow-inner">
-            <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-slate-400">Budget:</span>
-            <span className="font-mono font-bold text-emerald-400">₹{remainingInr}</span>
-            <span className="text-slate-500 text-[10px]">/ ₹{limitInr}</span>
+        {/* Right: Integrated Functional Action Buttons */}
+        <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+          {/* Autonomous Budget indicator pill */}
+          <div
+            title="Current UAP Daily Autonomous Budget"
+            className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200/80 text-[11px] font-semibold text-emerald-800"
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-gray-500 font-normal">Budget:</span>
+            <span className="font-mono font-bold text-emerald-700">₹{remainingBudgetINR}</span>
           </div>
 
-          {/* My Orders Button */}
+          {/* 📦 My Orders Button */}
           <button
             id="btn-my-orders"
             onClick={onToggleOrders}
-            title="My Orders"
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-all ${
+            title="View Order History & Razorpay Receipts"
+            className={`flex items-center gap-1.5 px-3 sm:px-3.5 py-2 rounded-full text-xs font-bold transition-all cursor-pointer ${
               activeView === 'orders'
-                ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 shadow-sm shadow-amber-900/20'
-                : 'bg-[#161b22] hover:bg-slate-800 border-slate-700 text-slate-300 hover:text-white'
+                ? 'bg-black text-white shadow-sm ring-2 ring-black/20'
+                : 'bg-[#F0F0F0] text-gray-800 hover:bg-gray-200 border border-transparent'
             }`}
           >
             <Package className="w-3.5 h-3.5" />
-            <span className="hidden md:inline">My Orders</span>
+            <span className="hidden sm:inline">📦 Orders</span>
           </button>
 
-          {/* Reset DB */}
+          {/* ⚙️ Settings & Daily Limit Button */}
           <button
-            onClick={onResetDb}
-            title="Reset Database & Stock"
-            className="p-2 rounded-lg bg-[#161b22] hover:bg-slate-800 border border-slate-700 text-slate-300 hover:text-white transition-colors"
-          >
-            <RefreshCw className="w-4 h-4" />
-          </button>
-
-          {/* Settings */}
-          <button
+            id="btn-settings"
             onClick={onToggleSettings}
-            title="Configure API Keys & Safety Ceilings"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#161b22] hover:bg-slate-800 border border-slate-700 text-xs font-medium text-slate-300 hover:text-white transition-colors"
+            title="Configure Dynamic Spending Limit and Safety Policies"
+            className="flex items-center gap-1.5 px-3 sm:px-3.5 py-2 rounded-full bg-[#F0F0F0] hover:bg-gray-200 text-gray-800 text-xs font-bold transition-colors cursor-pointer"
           >
-            <Sliders className="w-3.5 h-3.5 text-amber-400" />
-            <span className="hidden md:inline">Safety Controls</span>
+            <Sliders className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">⚙️ Settings</span>
           </button>
 
-          {/* 💬 Chat with Agent Button */}
+          {/* 📜 Developer Logs Console Button */}
+          <button
+            id="btn-dev-logs"
+            onClick={onToggleLogs}
+            title="Open Developer Systems Console Overlay (Audit Trail)"
+            className="flex items-center gap-1.5 px-3 sm:px-3.5 py-2 rounded-full bg-[#F0F0F0] hover:bg-gray-200 text-gray-800 text-xs font-bold transition-colors cursor-pointer"
+          >
+            <Terminal className="w-3.5 h-3.5 text-purple-600" />
+            <span className="hidden md:inline">📜 Logs</span>
+          </button>
+
+          {/* 💬 Chat with Agent CTA Button */}
           <button
             id="btn-toggle-chat"
             onClick={onToggleChat}
-            className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold transition-all shadow-md hover:scale-105 ${
+            title="Open AI Shopping Concierge Drawer"
+            className={`flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs font-extrabold transition-all shadow-sm cursor-pointer ${
               isChatOpen
-                ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-blue-900/30 ring-2 ring-blue-500/30'
-                : 'bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-500 hover:to-indigo-600 text-white shadow-blue-900/30'
+                ? 'bg-black text-white ring-2 ring-black/40 scale-98'
+                : 'bg-black text-white hover:bg-neutral-800 hover:scale-[1.02] active:scale-95'
             }`}
           >
-            <MessageCircle className="w-4 h-4" />
-            <span className="hidden sm:inline">Chat with Agent</span>
+            <MessageCircle className="w-4 h-4 text-white" />
+            <span>💬 Chat with Agent</span>
           </button>
 
-          {/* Cart Trigger */}
+          {/* 🛒 Cart Button */}
           <button
+            id="btn-open-cart"
             onClick={onOpenCart}
-            className="relative flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white text-xs font-semibold shadow-md shadow-amber-900/30 transition-all hover:scale-105"
+            title="View Cart"
+            className="relative p-2.5 sm:p-3 rounded-full hover:bg-gray-100 transition-colors cursor-pointer text-black"
           >
-            <ShoppingBag className="w-4 h-4" />
-            <span>Cart</span>
+            <ShoppingCart className="w-5 h-5 text-gray-900" />
             {cartCount > 0 && (
-              <span className="bg-white text-amber-900 text-[11px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
+              <span className="absolute top-1 right-1 bg-black text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
                 {cartCount}
               </span>
             )}

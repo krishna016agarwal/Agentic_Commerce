@@ -140,3 +140,93 @@ class OrderItem(BaseModel):
     discount_paisa: int = 0
     created_at: str
     updated_at: str
+
+
+# ─── High-Fidelity Audit Trail Payloads (Buildathon Track 1) ─────────────────
+
+class ReturnedProductItem(BaseModel):
+    product_id: str
+    name: str
+    stock_qty: int
+
+
+class ShowAllProductsLog(BaseModel):
+    user_id: str
+    intent: str = "SHOW_ALL_PRODUCTS"
+    model: str = "gemini-3.1-flash-lite"
+    returned_products: List[ReturnedProductItem]
+
+
+class TargetProductDetail(BaseModel):
+    product_id: str
+    name: str
+    description: str
+    price_paisa: int
+    stock_qty: int
+
+
+class ExplainProductLog(BaseModel):
+    user_id: str
+    intent: str = "EXPLAIN_PRODUCT"
+    model: str = "gemini-3.1-flash-lite"
+    target_product: TargetProductDetail
+
+
+class FailedItemDetail(BaseModel):
+    product_id: str
+    name: str
+    available_stock: int = 0
+
+
+class StockOutWarningLog(BaseModel):
+    user_id: str
+    intent: str = "STOCK_OUT_WARNING"
+    model: str = "gemini-3.1-flash-lite"
+    failed_item: FailedItemDetail
+    system_action: str = "BLOCKED_CHECKOUT_CONVERSATIONALLY"
+    graceful_fallback_message: str
+
+
+class SuggestedUpsellDetail(BaseModel):
+    product_id: str
+    name: str
+    original_price_paisa: int
+    bundle_price_paisa: int
+    applied_discount_code: str
+    discount_paisa: int
+
+
+class UpsellProposalLog(BaseModel):
+    trigger_upsell: bool = True
+    recommendation_engine: str = "Seller_Agent_v2"
+    user_cart: List[str]
+    suggested_product: SuggestedUpsellDetail
+    reasoning: str
+
+
+class UAPCeilingCheckLog(BaseModel):
+    checkpoint: str = "UAP_CEILING"
+    user_id: str
+    cart_total_paisa: int
+    remaining_daily_limit_paisa: int
+    status: str  # "APPROVED" | "ESCALATED"
+    selected_path: str  # "AUTONOMOUS_SETTLEMENT" | "HUMAN_OVERRIDE_TRIGGERED"
+    action: Optional[str] = None  # e.g., "LAUNCH_RAZORPAY_CHECKOUT_JS"
+
+
+class IdempotencySafetyCheckLog(BaseModel):
+    checkpoint: str = "IDEMPOTENCY_GATE"
+    transaction_id: str
+    acp_token: str
+    reentry_attempted: bool
+    status: str  # "BLOCKED" | "ISSUED"
+    reason: str
+
+
+class SweeperRecoveryLog(BaseModel):
+    checkpoint: str = "SYSTEM_SWEEPER"
+    cleanup_timestamp: str
+    expired_transaction_id: str
+    action_taken: str = "REVERTED_STOCK_RESERVATION"
+    reclaimed_items: List[Dict[str, Any]]
+

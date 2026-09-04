@@ -142,9 +142,16 @@ class SafetyGateway:
                 message = "Transaction is within your daily spending limit. The AI Agent will handle authorization autonomously!"
                 log_audit_event(
                     "[UAP CEILING]",
-                    f"Amount Rs {final_amount_paisa/100:,.2f} is WITHIN limit Rs {remaining_limit/100:,.2f}. Autonomous path selected.",
+                    f"Amount Rs {final_amount_paisa/100:,.2f} is WITHIN limit Rs {remaining_limit/100:,.2f}. Autonomous path approved.",
                     level="GATEWAY",
-                    metadata={"amount_paisa": final_amount_paisa, "remaining_limit": remaining_limit},
+                    metadata={
+                        "checkpoint": "UAP_CEILING",
+                        "user_id": user_id,
+                        "cart_total_paisa": final_amount_paisa,
+                        "remaining_daily_limit_paisa": remaining_limit,
+                        "status": "APPROVED",
+                        "selected_path": "AUTONOMOUS_SETTLEMENT"
+                    },
                     conn=conn
                 )
             else:
@@ -153,10 +160,18 @@ class SafetyGateway:
                 status = "RESERVED"
 
                 log_audit_event(
-                    "[ESCALATION TRIGGER]",
-                    f"BREACH: Rs {final_amount_paisa/100:,.2f} exceeds remaining limit Rs {remaining_limit/100:,.2f}. Escalating.",
+                    "[UAP CEILING]",
+                    f"BREACH (Failure Handled Gracefully #2): Rs {final_amount_paisa/100:,.2f} exceeds limit Rs {remaining_limit/100:,.2f}. Escalating to human approval.",
                     level="ALERT",
-                    metadata={"amount_paisa": final_amount_paisa, "remaining_paisa": remaining_limit},
+                    metadata={
+                        "checkpoint": "UAP_CEILING",
+                        "user_id": user_id,
+                        "cart_total_paisa": final_amount_paisa,
+                        "remaining_daily_limit_paisa": remaining_limit,
+                        "status": "ESCALATED",
+                        "selected_path": "HUMAN_OVERRIDE_TRIGGERED",
+                        "action": "LAUNCH_RAZORPAY_CHECKOUT_JS"
+                    },
                     conn=conn
                 )
 
@@ -199,8 +214,16 @@ class SafetyGateway:
 
             log_audit_event(
                 "[IDEMPOTENCY GATE]",
-                f"ACP token issued for {transaction_id}",
+                f"ACP cryptographic token issued for {transaction_id}",
                 level="GATEWAY",
+                metadata={
+                    "checkpoint": "IDEMPOTENCY_GATE",
+                    "transaction_id": transaction_id,
+                    "acp_token": acp_token,
+                    "reentry_attempted": False,
+                    "status": "ISSUED",
+                    "reason": "Cryptographic ACP token issued for atomic idempotency guarantee."
+                },
                 conn=conn
             )
 
@@ -234,6 +257,20 @@ class SafetyGateway:
             if not tx:
                 raise ValueError("Invalid transaction ID or ACP token.")
             if tx["status"] == "SUCCESS":
+                log_audit_event(
+                    "[IDEMPOTENCY GATE]",
+                    f"BLOCKED: Re-entry attempted on already settled {transaction_id} (Failure Handled Gracefully #3)",
+                    level="ALERT",
+                    metadata={
+                        "checkpoint": "IDEMPOTENCY_GATE",
+                        "transaction_id": transaction_id,
+                        "acp_token": token,
+                        "reentry_attempted": True,
+                        "status": "BLOCKED",
+                        "reason": "Token replay attack or double-click checkout prevented safely."
+                    },
+                    conn=conn
+                )
                 return {"status": "SUCCESS", "message": "Already settled."}
             if tx["status"] != "RESERVED":
                 raise ValueError(f"Cannot settle in state '{tx['status']}'.")
@@ -287,6 +324,20 @@ class SafetyGateway:
             if not tx:
                 raise ValueError("Invalid transaction or token mismatch.")
             if tx["status"] == "SUCCESS":
+                log_audit_event(
+                    "[IDEMPOTENCY GATE]",
+                    f"BLOCKED: Duplicate payment confirmation attempt on {transaction_id} (Failure Handled Gracefully #3)",
+                    level="ALERT",
+                    metadata={
+                        "checkpoint": "IDEMPOTENCY_GATE",
+                        "transaction_id": transaction_id,
+                        "acp_token": token,
+                        "reentry_attempted": True,
+                        "status": "BLOCKED",
+                        "reason": "Token replay attack or double-click checkout prevented safely."
+                    },
+                    conn=conn
+                )
                 return {"status": "SUCCESS", "message": "Payment already confirmed."}
 
             # Verify signature
@@ -343,16 +394,31 @@ def run_inventory_sweeper():
                 )
                 for tx in cursor.fetchall():
                     items = json.loads(tx["items_json"])
+                    reclaimed = []
                     for it in items:
                         cursor.execute(
                             "UPDATE products SET stock_qty = stock_qty + ? WHERE product_id = ?",
                             (it["qty"], it["product_id"])
                         )
+                        reclaimed.append({"product_id": it["product_id"], "qty": it["qty"]})
                     cursor.execute(
                         "UPDATE transactions SET status='FAILED', updated_at=? WHERE transaction_id=?",
                         (datetime.now().isoformat(), tx["transaction_id"])
                     )
-                    log_audit_event("[SWEEPER]", f"Expired: {tx['transaction_id']}", level="GATEWAY", conn=conn)
+                    sweeper_payload = {
+                        "checkpoint": "SYSTEM_SWEEPER",
+                        "cleanup_timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3],
+                        "expired_transaction_id": tx["transaction_id"],
+                        "action_taken": "REVERTED_STOCK_RESERVATION",
+                        "reclaimed_items": reclaimed
+                    }
+                    log_audit_event(
+                        "[SWEEPER RECOVERY]",
+                        f"REVERTED (Failure Handled Gracefully #4): Expired stock reservation reclaimed for {tx['transaction_id']}",
+                        level="GATEWAY",
+                        metadata=sweeper_payload,
+                        conn=conn
+                    )
         except Exception as e:
             print(f"[SWEEPER ERROR] {e}")
 

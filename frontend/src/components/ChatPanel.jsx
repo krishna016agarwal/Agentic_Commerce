@@ -5,18 +5,18 @@ import {
 } from 'lucide-react'
 
 // ── Interactive Product Card inside Chat Bubble (Requirement 2) ───────────────
-function ChatProductCard({ product, onAddToCart }) {
+function ChatProductCard({ product, onAddToCart, isTyping }) {
   const priceINR = (product.price_paisa / 100).toLocaleString('en-IN')
   const [added, setAdded] = useState(false)
 
+  const isAvailable = product.in_stock !== false && (product.stock_qty === undefined || product.stock_qty > 0)
+
   const handleAdd = () => {
-    if (!product.in_stock && product.stock_qty <= 0) return
-    onAddToCart(product)
+    if (!isAvailable || isTyping || added) return
     setAdded(true)
+    if (onAddToCart) onAddToCart(product)
     setTimeout(() => setAdded(false), 2200)
   }
-
-  const isAvailable = product.in_stock !== false && (product.stock_qty === undefined || product.stock_qty > 0)
 
   return (
     <div className="rounded-2xl overflow-hidden flex flex-col bg-white border border-gray-200 shadow-sm hover:shadow-md hover:border-black/30 transition-all group">
@@ -51,11 +51,11 @@ function ChatProductCard({ product, onAddToCart }) {
 
         <button
           onClick={handleAdd}
-          disabled={!isAvailable}
+          disabled={!isAvailable || isTyping}
           className={`mt-3 text-xs font-bold py-2 px-3 rounded-full flex items-center gap-1.5 justify-center transition-all cursor-pointer ${
             added
               ? 'bg-emerald-500 text-white'
-              : isAvailable
+              : isAvailable && !isTyping
               ? 'bg-black hover:bg-neutral-800 text-white shadow-xs'
               : 'bg-gray-100 text-gray-400 cursor-not-allowed'
           }`}
@@ -94,7 +94,7 @@ function FormattedText({ text }) {
 }
 
 // ── Chat Message Bubble ───────────────────────────────────────────────────────
-function MessageBubble({ msg, onAddToCart, onRetryPayment }) {
+function MessageBubble({ msg, onAddToCart, onRetryPayment, isTyping }) {
   const isUser = msg.role === 'user'
   const time = new Date(msg.ts).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
 
@@ -129,7 +129,12 @@ function MessageBubble({ msg, onAddToCart, onRetryPayment }) {
         {msg.products && msg.products.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5 mt-1">
             {msg.products.map(p => (
-              <ChatProductCard key={p.product_id} product={p} onAddToCart={onAddToCart} />
+              <ChatProductCard
+                key={p.product_id}
+                product={p}
+                onAddToCart={onAddToCart}
+                isTyping={isTyping}
+              />
             ))}
           </div>
         )}
@@ -437,6 +442,11 @@ export default function ChatPanel({
     }
   }, [initialQuery])
 
+  const handleChatAddToCart = useCallback((product) => {
+    if (!product || isTypingRef.current) return
+    sendMessage(`Add ${product.name} to cart`, safeCart)
+  }, [sendMessage, safeCart])
+
   const handleSend = useCallback((customText) => {
     const text = (customText !== undefined && customText !== null) ? customText : input
     if (!text || !text.trim()) return
@@ -606,8 +616,9 @@ export default function ChatPanel({
             <MessageBubble
               key={msg.id}
               msg={msg}
-              onAddToCart={onAddToCart}
+              onAddToCart={handleChatAddToCart}
               onRetryPayment={triggerRazorpayCheckout}
+              isTyping={isTyping}
             />
           ))}
 

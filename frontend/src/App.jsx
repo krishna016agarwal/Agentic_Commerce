@@ -105,8 +105,10 @@ export default function App() {
       console.error('Upsell evaluation failed:', e)
     }
 
-    setIsCartOpen(true)
-  }, [])
+    if (!isChatPanelOpen) {
+      setIsCartOpen(true)
+    }
+  }, [isChatPanelOpen])
 
   const handleUpdateQty = (productId, newQty) => {
     if (newQty <= 0) handleRemoveItem(productId)

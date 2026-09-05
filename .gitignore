@@ -2,7 +2,11 @@
 antigravity-conversational-amazon-prompt.md
 antigravity-master-prompt.md
 download (1).webp
+download(1).webp
 download.webp
+*.webp
+!frontend/public/assets/*.webp
+!frontend/public/*.webp
 png-transparent-product-kind-omega-watches-watches-product-kind-omega-watch-thumbnail.png
 
 # Python
@@ -14,6 +18,11 @@ __pycache__/
 env/
 venv/
 .venv/
+backend/env/
+backend/venv/
+backend/.venv/
+.pytest_cache/
+backend/.pytest_cache/
 backend/*.db
 backend/*.db-wal
 backend/*.db-shm

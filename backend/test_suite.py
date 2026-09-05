@@ -1,6 +1,6 @@
 """
-Comprehensive Test Suite for Razorpay Agentic Commerce Portal Backend.
-Validates Deterministic Safety Boundary, Autonomous Execution, Human Escalation, and Concurrency Locks.
+Comprehensive Test Suite for Agentic Commerce Portal Backend.
+Validates the Deterministic Safety Gateway, spending limits, and order processing.
 """
 import pytest
 from fastapi.testclient import TestClient

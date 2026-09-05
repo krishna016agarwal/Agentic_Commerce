@@ -248,9 +248,8 @@ export default function ChatPanel({
   latestConfirmedPayment
 }) {
   const safeCart = cart || []
-  const safeDiscountCode = discountCode || ''
-  const safeRazorpayKeyId = razorpayKeyId || 'rzp_test_TWl4eo89k3aLud'
-  const safeRazorpayKeySecret = razorpayKeySecret || 'TnA2AVvCQ5Ys6gdmVHHYLJ72'
+  const safeRazorpayKeyId = razorpayKeyId || ''
+  const safeRazorpayKeySecret = razorpayKeySecret || ''
 
   const [messages, setMessages] = useState([])
   const [input, setInput] = useState('')

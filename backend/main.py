@@ -1,5 +1,5 @@
 """
-FastAPI application — Razorpay Agentic Commerce Portal.
+FastAPI application — Agentic Commerce Portal.
 API keys managed via .env on backend only.
 """
 import json
@@ -25,8 +25,8 @@ from gateway import SafetyGateway, RAZORPAY_KEY_ID
 init_db(force_reseed=False)
 
 app = FastAPI(
-    title="Razorpay Agentic Commerce Portal API",
-    description="Track 1: AI Growth & Agentic Commerce — Conversational E-Commerce with Autonomous Agent Settlement",
+    title="Agentic Commerce Portal API",
+    description="Conversational E-Commerce with Autonomous Agent Settlement (using Razorpay for payment processing)",
     version="2.0.0"
 )
 
@@ -38,20 +38,27 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ─── Health ───────────────────────────────────────────────────────────────────
+# ─── Health & Config ──────────────────────────────────────────────────────────
 
 @app.get("/")
 def root():
     return {
-        "portal": "Razorpay Agentic Commerce Portal",
+        "portal": "Agentic Commerce Portal",
         "version": "2.0.0",
         "status": "ONLINE",
         "endpoints": [
             "/api/catalog", "/api/user", "/api/chat", "/api/upsell",
             "/api/checkout/initiate", "/api/checkout/autonomous",
             "/api/checkout/confirm", "/api/orders", "/api/audit-trail",
-            "/api/memory/clear", "/api/reset-db"
+            "/api/memory/clear", "/api/reset-db", "/api/config"
         ]
+    }
+
+@app.get("/api/config")
+def get_public_config():
+    """Return non-sensitive public configuration (public key only, secret is never exposed)."""
+    return {
+        "razorpay_key_id": RAZORPAY_KEY_ID
     }
 
 # ─── Catalog ──────────────────────────────────────────────────────────────────

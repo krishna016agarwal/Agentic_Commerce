@@ -142,7 +142,7 @@ class OrderItem(BaseModel):
     updated_at: str
 
 
-# ─── High-Fidelity Audit Trail Payloads (Buildathon Track 1) ─────────────────
+# ─── High-Fidelity Audit Trail Payloads ───────────────────────────────────────
 
 class ReturnedProductItem(BaseModel):
     product_id: str

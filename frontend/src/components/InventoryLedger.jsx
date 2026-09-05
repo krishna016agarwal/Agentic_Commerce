@@ -199,8 +199,7 @@ export default function InventoryLedger({
         </div>
         <div className="grid grid-cols-2 gap-2 text-[10px] font-mono">
           <div className="bg-[#12161f] p-1.5 rounded border border-slate-800 truncate">
-            <span className="text-slate-500 block text-[9px]">RAZORPAY ID:</span>
-            <span className="text-slate-300">{razorpayKeyId ? `${razorpayKeyId.slice(0, 10)}...` : 'rzp_test_...'}</span>
+            <span className="text-slate-300">{razorpayKeyId ? `${razorpayKeyId.slice(0, 8)}...` : 'Loaded via .env'}</span>
           </div>
           <div className="bg-[#12161f] p-1.5 rounded border border-slate-800 truncate">
             <span className="text-slate-500 block text-[9px]">GEMINI MODEL:</span>

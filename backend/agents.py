@@ -504,7 +504,7 @@ class BuyerAgent:
                 })
         # If intent == "CHAT", recommended_products remains empty so it will NOT show unrelated products!
 
-        # ── 4. Granular Audit Logging (Buildathon Track 1 Architecture) ──
+        # ── 4. Granular Audit Logging ──
         msg_lower_full = message.lower()
         is_explain_query = any(w in msg_lower_full for w in ["explain", "feature", "specs", "specification", "detail", "tell me about"])
         is_all_products_query = any(w in msg_lower_full for w in ["show all", "all products", "list products", "catalog", "show products", "show watches", "show laptops", "products"])

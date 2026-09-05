@@ -33,22 +33,27 @@ export default function App() {
     setIsChatPanelOpen(true)
   }
 
-  // Gateway Credentials
+  // Gateway Credentials (loaded securely from backend .env, never hardcoded on frontend)
   const [geminiKey, setGeminiKey] = useState('')
-  const [razorpayKeyId, setRazorpayKeyId] = useState('rzp_test_TWl4eo89k3aLud')
-  const [razorpayKeySecret, setRazorpayKeySecret] = useState('TnA2AVvCQ5Ys6gdmVHHYLJ72')
+  const [razorpayKeyId, setRazorpayKeyId] = useState('')
+  const [razorpayKeySecret, setRazorpayKeySecret] = useState('')
 
   // ── Data Fetch ─────────────────────────────────────────────────────────────
   const fetchData = useCallback(async () => {
     try {
-      const [prodRes, userRes, logRes] = await Promise.all([
+      const [prodRes, userRes, logRes, confRes] = await Promise.all([
         fetch('/api/catalog'),
         fetch('/api/user?user_id=user_01'),
-        fetch('/api/audit-trail?limit=50')
+        fetch('/api/audit-trail?limit=50'),
+        fetch('/api/config')
       ])
       if (prodRes.ok) setProducts(await prodRes.json())
       if (userRes.ok) setUser(await userRes.json())
       if (logRes.ok) setAuditLogs(await logRes.json())
+      if (confRes && confRes.ok) {
+        const conf = await confRes.json()
+        if (conf.razorpay_key_id) setRazorpayKeyId(conf.razorpay_key_id)
+      }
     } catch (err) {
       console.error('Error fetching portal data:', err)
     }

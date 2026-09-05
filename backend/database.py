@@ -1,5 +1,5 @@
 """
-Database initialization and SQLite connection management for Razorpay Agentic Commerce Portal.
+Database initialization and SQLite connection management for Agentic Commerce Portal.
 Configured with SQLite WAL mode, foreign keys, absolute directory paths, and conversation memory.
 """
 import os

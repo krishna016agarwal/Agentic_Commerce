@@ -240,20 +240,24 @@ export default function SettingsModal({
           )}
 
           {activeTab === 'keys' && (
-            <div className="space-y-4 text-xs">
+              <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-[11px] leading-relaxed">
+                🔒 <strong>Production Security:</strong> API keys are securely managed inside <code className="font-mono bg-emerald-100 px-1 py-0.5 rounded">backend/.env</code>. The backend never exposes your Secret Key to the browser.
+              </div>
               <div>
-                <label className="block text-gray-700 font-bold mb-1">Razorpay Key ID (Testnet):</label>
+                <label className="block text-gray-700 font-bold mb-1">Razorpay Key ID (Public):</label>
                 <input
                   type="text"
+                  placeholder="Loaded from backend .env"
                   value={razorpayKeyId}
                   onChange={e => setRazorpayKeyId(e.target.value)}
                   className="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 border border-gray-200 font-mono text-gray-900 focus:outline-none focus:border-black"
                 />
               </div>
               <div>
-                <label className="block text-gray-700 font-bold mb-1">Razorpay Key Secret:</label>
+                <label className="block text-gray-700 font-bold mb-1">Razorpay Key Secret (Server Only):</label>
                 <input
                   type="password"
+                  placeholder="Protected in backend .env (never transmitted)"
                   value={razorpayKeySecret}
                   onChange={e => setRazorpayKeySecret(e.target.value)}
                   className="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 border border-gray-200 font-mono text-gray-900 focus:outline-none focus:border-black"
